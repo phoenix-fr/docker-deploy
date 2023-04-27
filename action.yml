@@ -1,0 +1,49 @@
+name: Deploy
+description: A GitHub Action that deploy apps
+inputs:
+  GH_TOKEN:
+    description: GitHub Token
+    required: true
+  REMOTE_DOCKER_HOST:
+    description: Remote Docker ssh IP
+    required: true
+  REMOTE_DOCKER_USER:
+    description: Remote Docker ssh user
+    required: false
+    default: 'debian'
+  REMOTE_DOCKER_PORT:
+    description: Remote Docker ssh port ie (22)
+    required: false
+    default: '22'
+  FQDN:
+    description: FQDN of env
+    required: true
+  SSH_PRIVATE_KEY:
+    description: SSH private key used to connect to the docker host
+    required: true
+  STACK_FILE:
+    description: Docker stack file used. Default is docker-compose.yml
+    required: false
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    - name: Apply env
+      shell: bash
+      run: |
+        export STACK=${{ inputs.STACK_FILE }}
+        export FQDN="${{ inputs.FQDN }}"
+        envsubst < ${{ inputs.STACK_FILE }} > temp.1
+        rm -f ${{ inputs.STACK_FILE }}
+        mv temp.1 ${{ inputs.STACK_FILE }}
+    - name: Deploy to Docker swarm
+      uses: phoenix-fr/docker-deployment-action@v2.0.15
+      with:
+        remote_docker_host: ${{ inputs.REMOTE_DOCKER_USER }}@${{ inputs.REMOTE_DOCKER_HOST }}
+        remote_docker_port: ${{ inputs.REMOTE_DOCKER_PORT }}
+        ssh_private_key: ${{ inputs.SSH_PRIVATE_KEY }}
+        stack_file_name: ${{ inputs.STACK_FILE }}
+        gh_token: ${{ inputs.GH_TOKEN }}
+        args: --prune ${{ inputs.STACK_FILE }}
