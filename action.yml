@@ -33,7 +33,7 @@ runs:
     - name: Apply env
       shell: bash
       run: |
-        export STACK=${{ inputs.STACK_FILE }}
+        export STACK=${{ github.event.repository.name }}
         export FQDN="${{ inputs.FQDN }}"
         envsubst < ${{ inputs.STACK_FILE }} > temp.1
         rm -f ${{ inputs.STACK_FILE }}
