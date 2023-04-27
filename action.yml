@@ -46,4 +46,4 @@ runs:
         ssh_private_key: ${{ inputs.SSH_PRIVATE_KEY }}
         stack_file_name: ${{ inputs.STACK_FILE }}
         gh_token: ${{ inputs.GH_TOKEN }}
-        args: --prune ${{ inputs.STACK_FILE }}
+        args: --prune ${{ github.event.repository.name }}
